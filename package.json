@@ -32,6 +32,7 @@
     "lint": "eslint --ext .js,.vue src test/unit/specs",
     "prepublishOnly": "npm run build"
   },
+  "prepare": "npm run build",
   "pre-commit": [
     "lint",
     "test"
