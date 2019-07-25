@@ -62,8 +62,23 @@
     </div>
 
     <div class="example">
+      <h3>Disable a date</h3>
+      <datepicker :changeDateState="selectedDateToDisable"></datepicker>
+      <code>
+        &lt;datepicker :changeDateState="selectedDateToDisable"&gt;&lt;/datepicker&gt;
+      </code>
+      <div class="settings">
+        <h5>Settings</h5>    
+        <div class="form-group">
+          <label>Select the date to disable</label>
+          <datepicker v-on:selected="setSelectedDateToDisable"></datepicker>
+        </div>
+      </div>
+    </div>
+
+    <div class="example">
       <h3>With minimum and maximum date range</h3>
-      <datepicker :changeDateState="changeDateState"></datepicker>
+      <datepicker :changeDateState="changeDateState" :inline="true" :defaultDateState="defaultDateState"></datepicker>
       <code>
         &lt;datepicker :changeDateState="changeDateState"&gt;&lt;/datepicker&gt;
       </code>
@@ -72,7 +87,6 @@
         <div class="form-group">
           <label>Default state</label>
           <input v-model="defaultDateState" type="checkbox"></input>
-          <div>{{  }}</div>
         </div>
         <div class="form-group">
           <label>Change state to:</label>
@@ -301,7 +315,8 @@ export default {
       state: state,
       vModelExample: null,
       languages: lang,
-      language: 'en'
+      language: 'en',
+      selectedDateToDisable: {}
     }
   },
   computed: {
@@ -371,6 +386,11 @@ export default {
         }
       }
       this.changeDateState.from = val
+    },
+    setSelectedDateToDisable (val) {
+      this.selectedDateToDisable = {
+        dates: [val]
+      }
     }
   }
 }

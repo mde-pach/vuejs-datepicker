@@ -130,7 +130,10 @@ export default {
     fullMonthName: Boolean,
     changeDateState: Object,
     enabledDates: Object,
-    defaultDateState: Boolean,
+    defaultDateState: {
+      type: Boolean,
+      default: true
+    },
     highlighted: Object,
     placeholder: String,
     inline: Boolean,
