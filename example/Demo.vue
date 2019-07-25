@@ -63,28 +63,33 @@
 
     <div class="example">
       <h3>With minimum and maximum date range</h3>
-      <datepicker :disabledDates="disabledDates"></datepicker>
+      <datepicker :changeDateState="changeDateState"></datepicker>
       <code>
-        &lt;datepicker :disabledDates="disabledDates"&gt;&lt;/datepicker&gt;
+        &lt;datepicker :changeDateState="changeDateState"&gt;&lt;/datepicker&gt;
       </code>
       <div class="settings">
         <h5>Settings</h5>
         <div class="form-group">
-          <label>Disabled to:</label>
-          <datepicker v-on:selected="disableTo"></datepicker>
+          <label>Default state</label>
+          <input v-model="defaultDateState" type="checkbox"></input>
+          <div>{{  }}</div>
         </div>
         <div class="form-group">
-          <label>Disabled from:</label>
-          <datepicker v-on:selected="disableFrom"></datepicker>
+          <label>Change state to:</label>
+          <datepicker v-on:selected="changeDayStateTo"></datepicker>
         </div>
         <div class="form-group">
-          <label>Disabled Days of Month:</label>
-          <input type="text" value="" v-on:change="setDisabledDays" placeholder="5,6,12,13">
+          <label>Change state from:</label>
+          <datepicker v-on:selected="changeDayStateFrom"></datepicker>
         </div>
-        <pre>disabled: {{ disabledDates }}</pre>
-
+        <div class="form-group">
+          <label>Change Days state of Month:</label>
+          <input type="text" value="" v-on:change="setChangeStateDays" placeholder="5,6,12,13">
+        </div>
+        <pre>change date state: {{ changeDateState }}</pre>
+        <pre>default date state: {{ defaultDateState }}</pre>
         <h5>Resulting Date picker</h5>
-        <datepicker :disabledDates="disabledDates"></datepicker>
+        <datepicker :defaultDateState="defaultDateState" :changeDateState="changeDateState"></datepicker>
       </div>
     </div>
 
@@ -92,12 +97,12 @@
       <div class="settings">
         <h5>Settings</h5>
         <div class="form-group">
-          <label>Disabled Function:</label>
+          <label>Change day state Function:</label>
         </div>
         <pre>
-          disabledDates: {
+          changeDateState: {
             customPredictor: function (date) {
-              // disables every day of a month which is a multiple of 3
+              // change state of every day of a month which is a multiple of 3
               if (date.getDate() % 3 === 0) {
                 return true
               }
@@ -105,7 +110,7 @@
           }
         </pre>
         <h5>Resulting Date picker</h5>
-        <datepicker :disabledDates="disabledFn"></datepicker>
+        <datepicker :changeDateState="changeStateDaysFn"></datepicker>
       </div>
     </div>
 
@@ -246,6 +251,14 @@
       </code>
     </div>
 
+    <div class="example">
+      <h3>Disable by default</h3>
+      <datepicker :defaultDateState="false"></datepicker>
+      <code>
+        &lt;datepicker :defaultDateState="false"&gt;&lt;/datepicker&gt;
+      </code>
+    </div>
+
   </div>
 </template>
 
@@ -266,9 +279,10 @@ export default {
     return {
       styleInput: null,
       format: 'd MMMM yyyy',
-      disabledDates: {},
+      changeDateState: {},
+      defaultDateState: true,
       openDate: null,
-      disabledFn: {
+      changeStateDaysFn: {
         customPredictor (date) {
           if (date.getDate() % 3 === 0) {
             return true
@@ -327,36 +341,36 @@ export default {
         daysOfMonth: highlightedDays
       }
     },
-    setDisabledDays (elem) {
+    setChangeStateDays (elem) {
       if (elem.target.value === 'undefined') {
         return
       }
-      let disabledDays = elem.target.value.split(',').map(day => parseInt(day))
-      this.disabledDates = {
-        from: this.disabledDates.from,
-        to: this.disabledDates.to,
-        daysOfMonth: disabledDays
+      let ChangeStateDays = elem.target.value.split(',').map(day => parseInt(day))
+      this.changeDateState = {
+        from: this.changeDateState.from,
+        to: this.changeDateState.to,
+        daysOfMonth: ChangeStateDays
       }
     },
-    disableTo (val) {
-      if (typeof this.disabledDates.to === 'undefined') {
-        this.disabledDates = {
+    changeDayStateTo (val) {
+      if (typeof this.changeDateState.to === 'undefined') {
+        this.changeDateState = {
           to: null,
-          daysOfMonth: this.disabledDates.daysOfMonth,
-          from: this.disabledDates.from
+          daysOfMonth: this.changeDateState.daysOfMonth,
+          from: this.changeDateState.from
         }
       }
-      this.disabledDates.to = val
+      this.changeDateState.to = val
     },
-    disableFrom (val) {
-      if (typeof this.disabledDates.from === 'undefined') {
-        this.disabledDates = {
-          to: this.disabledDates.to,
-          daysOfMonth: this.disabledDates.daysOfMonth,
+    changeDayStateFrom (val) {
+      if (typeof this.changeDateState.from === 'undefined') {
+        this.changeDateState = {
+          to: this.changeDateState.to,
+          daysOfMonth: this.changeDateState.daysOfMonth,
           from: null
         }
       }
-      this.disabledDates.from = val
+      this.changeDateState.from = val
     }
   }
 }

@@ -38,7 +38,8 @@
       :showDayView="showDayView"
       :fullMonthName="fullMonthName"
       :allowedToShowView="allowedToShowView"
-      :disabledDates="disabledDates"
+      :defaultDateState="defaultDateState"
+      :changeDateState="changeDateState"
       :highlighted="highlighted"
       :calendarClass="calendarClass"
       :calendarStyle="calendarStyle"
@@ -62,7 +63,7 @@
       :selectedDate="selectedDate"
       :showMonthView="showMonthView"
       :allowedToShowView="allowedToShowView"
-      :disabledDates="disabledDates"
+      :changeDateState="changeDateState"
       :calendarClass="calendarClass"
       :calendarStyle="calendarStyle"
       :translation="translation"
@@ -81,7 +82,7 @@
       :selectedDate="selectedDate"
       :showYearView="showYearView"
       :allowedToShowView="allowedToShowView"
-      :disabledDates="disabledDates"
+      :changeDateState="changeDateState"
       :calendarClass="calendarClass"
       :calendarStyle="calendarStyle"
       :translation="translation"
@@ -127,7 +128,9 @@ export default {
     },
     dayCellContent: Function,
     fullMonthName: Boolean,
-    disabledDates: Object,
+    changeDateState: Object,
+    enabledDates: Object,
+    defaultDateState: Object,
     highlighted: Object,
     placeholder: String,
     inline: Boolean,

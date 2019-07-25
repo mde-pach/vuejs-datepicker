@@ -5,12 +5,12 @@
       <span
         @click="isRtl ? nextMonth() : previousMonth()"
         class="prev"
-        :class="{'disabled': isLeftNavDisabled}">&lt;</span>
+        >&lt;</span>
       <span class="day__month_btn" @click="showMonthCalendar" :class="allowedToShowView('month') ? 'up' : ''">{{ isYmd ? currYearName : currMonthName }} {{ isYmd ? currMonthName : currYearName }}</span>
       <span
         @click="isRtl ? previousMonth() : nextMonth()"
         class="next"
-        :class="{'disabled': isRightNavDisabled}">&gt;</span>
+        >&gt;</span>
     </header>
     <div :class="isRtl ? 'flex-rtl' : ''">
       <span class="cell day-header" v-for="d in daysOfWeek" :key="d.timestamp">{{ d }}</span>
@@ -40,7 +40,11 @@ export default {
       type: Function,
       default: day => day.date
     },
-    disabledDates: Object,
+    defaultDateState: {
+      type: Boolean,
+      default: true
+    },
+    changeDateState: Object,
     highlighted: Object,
     calendarClass: [String, Object, Array],
     calendarStyle: Object,
@@ -99,7 +103,7 @@ export default {
           date: this.utils.getDate(dObj),
           timestamp: dObj.getTime(),
           isSelected: this.isSelectedDate(dObj),
-          isDisabled: this.isDisabledDate(dObj),
+          isDisabled: !this.dateState(dObj),
           isHighlighted: this.isHighlightedDate(dObj),
           isHighlightStart: this.isHighlightStart(dObj),
           isHighlightEnd: this.isHighlightEnd(dObj),
@@ -134,24 +138,6 @@ export default {
      */
     isYmd () {
       return this.translation.ymd && this.translation.ymd === true
-    },
-    /**
-     * Is the left hand navigation button disabled?
-     * @return {Boolean}
-     */
-    isLeftNavDisabled () {
-      return this.isRtl
-        ? this.isNextMonthDisabled(this.pageTimestamp)
-        : this.isPreviousMonthDisabled(this.pageTimestamp)
-    },
-    /**
-     * Is the right hand navigation button disabled?
-     * @return {Boolean}
-     */
-    isRightNavDisabled () {
-      return this.isRtl
-        ? this.isPreviousMonthDisabled(this.pageTimestamp)
-        : this.isNextMonthDisabled(this.pageTimestamp)
     }
   },
   methods: {
@@ -187,41 +173,13 @@ export default {
      * Decrement the page month
      */
     previousMonth () {
-      if (!this.isPreviousMonthDisabled()) {
-        this.changeMonth(-1)
-      }
-    },
-    /**
-     * Is the previous month disabled?
-     * @return {Boolean}
-     */
-    isPreviousMonthDisabled () {
-      if (!this.disabledDates || !this.disabledDates.to) {
-        return false
-      }
-      let d = this.pageDate
-      return this.utils.getMonth(this.disabledDates.to) >= this.utils.getMonth(d) &&
-        this.utils.getFullYear(this.disabledDates.to) >= this.utils.getFullYear(d)
+      this.changeMonth(-1)
     },
     /**
      * Increment the current page month
      */
     nextMonth () {
-      if (!this.isNextMonthDisabled()) {
-        this.changeMonth(+1)
-      }
-    },
-    /**
-     * Is the next month disabled?
-     * @return {Boolean}
-     */
-    isNextMonthDisabled () {
-      if (!this.disabledDates || !this.disabledDates.from) {
-        return false
-      }
-      let d = this.pageDate
-      return this.utils.getMonth(this.disabledDates.from) <= this.utils.getMonth(d) &&
-        this.utils.getFullYear(this.disabledDates.from) <= this.utils.getFullYear(d)
+      this.changeMonth(+1)
     },
     /**
      * Whether a day is selected
@@ -232,51 +190,51 @@ export default {
       return this.selectedDate && this.utils.compareDates(this.selectedDate, dObj)
     },
     /**
-     * Whether a day is disabled
+     * State of a day
      * @param {Date}
      * @return {Boolean}
      */
-    isDisabledDate (date) {
-      let disabledDates = false
+    dateState (date) {
+      let defaultDateState = this.defaultDateState !== false
 
-      if (typeof this.disabledDates === 'undefined') {
-        return false
+      if (typeof this.changeDateState === 'undefined') {
+        return defaultDateState
       }
-
-      if (typeof this.disabledDates.dates !== 'undefined') {
-        this.disabledDates.dates.forEach((d) => {
+      if (typeof this.changeDateState.dates !== 'undefined') {
+        for (let d of this.changeDateState.dates) {
           if (this.utils.compareDates(date, d)) {
-            disabledDates = true
-            return true
+            return !defaultDateState
           }
-        })
+        }
       }
-      if (typeof this.disabledDates.to !== 'undefined' && this.disabledDates.to && date < this.disabledDates.to) {
-        disabledDates = true
+
+      if (this.changeDateState.to && date < this.changeDateState.to) {
+        return !defaultDateState
       }
-      if (typeof this.disabledDates.from !== 'undefined' && this.disabledDates.from && date > this.disabledDates.from) {
-        disabledDates = true
+      if (this.changeDateState.from && date > this.changeDateState.from) {
+        return !defaultDateState
       }
-      if (typeof this.disabledDates.ranges !== 'undefined') {
-        this.disabledDates.ranges.forEach((range) => {
-          if (typeof range.from !== 'undefined' && range.from && typeof range.to !== 'undefined' && range.to) {
-            if (date < range.to && date > range.from) {
-              disabledDates = true
-              return true
+
+      if (typeof this.changeDateState.ranges !== 'undefined') {
+        for (let range of this.changeDateState.ranges) {
+          if (range.from && range.to) {
+            if (range.from < date < range.to) {
+              return !defaultDateState
             }
           }
-        })
+        }
       }
-      if (typeof this.disabledDates.days !== 'undefined' && this.disabledDates.days.indexOf(this.utils.getDay(date)) !== -1) {
-        disabledDates = true
+
+      if (typeof this.changeDateState.days !== 'undefined' && this.changeDateState.days.indexOf(this.utils.getDay(date)) !== -1) {
+        return !defaultDateState
       }
-      if (typeof this.disabledDates.daysOfMonth !== 'undefined' && this.disabledDates.daysOfMonth.indexOf(this.utils.getDate(date)) !== -1) {
-        disabledDates = true
+      if (this.changeDateState.daysOfMonth && this.changeDateState.daysOfMonth.indexOf(this.utils.getDate(date)) !== -1) {
+        return !defaultDateState
       }
-      if (typeof this.disabledDates.customPredictor === 'function' && this.disabledDates.customPredictor(date)) {
-        disabledDates = true
+      if (typeof this.changeDateState.customPredictor === 'function') {
+        return this.changeDateState.customPredictor(date) === true
       }
-      return disabledDates
+      return defaultDateState
     },
     /**
      * Whether a day is highlighted (only if it is not disabled already except when highlighted.includeDisabled is true)
@@ -284,7 +242,7 @@ export default {
      * @return {Boolean}
      */
     isHighlightedDate (date) {
-      if (!(this.highlighted && this.highlighted.includeDisabled) && this.isDisabledDate(date)) {
+      if (!(this.highlighted && this.highlighted.includeDisabled) && !this.dateState(date)) {
         return false
       }
 
